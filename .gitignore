@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Ambientes virtuais
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dados: imagens e datasets ficam no Google Drive (raw/, interim/, processed/).
+# No repositório, apenas os manifestos CSV em data/manifests/.
+data/*
+!data/manifests/
+data/manifests/*
+!data/manifests/*.csv
+!data/manifests/.gitkeep
+
+# Segunda camada de proteção contra imagens e arquivos grandes fora de paper/ e reports/
+*.jpg
+*.jpeg
+*.JPG
+*.JPEG
+*.webp
+*.tif
+*.tiff
+*.zip
+*.tar
+*.tar.gz
+!paper/figures/**
+!reports/figures/**
+
+# Saídas locais e temporárias (resultados oficiais ficam no Google Drive)
+outputs/*
+!outputs/.gitkeep
+
+# Ferramentas de rastreamento de experimentos
+wandb/
+runs/
+lightning_logs/
+mlruns/
+
+# Arquivos de modelos
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.safetensors
+
+# Configurações locais e credenciais
+.env
+.env.*
+!.env.example
+
+# Sistema operacional
+.DS_Store
+
+# LaTeX - diretório de compilação e arquivos auxiliares
+paper/.build/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.synctex.gz
+*.toc
+*.log
+*.bcf
+*.run.xml
+*.nav
+*.snm
+*.vrb

@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cerrado-flora"
+version = "0.1.0"
+description = "Classificação de espécies vegetais do Cerrado com gating orientado à frequência (GmNet, ICLR 2026)."
+requires-python = ">=3.10"
+# Versões mínimas apenas. torch/torchvision já vêm instalados no Colab e não
+# devem ser reinstalados. As versões exatas de cada execução são registradas
+# via `cerrado_flora.utils.run_metadata` (pip freeze + hash do commit).
+dependencies = [
+    "torch",
+    "torchvision",
+    "timm",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "matplotlib",
+    "pyyaml",
+    "requests",
+    "tqdm",
+    "pillow",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "ipykernel",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
