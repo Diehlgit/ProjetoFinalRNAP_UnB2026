@@ -1,0 +1,26 @@
+# Pesos pré-treinados de terceiros. Os arquivos ficam no Google Drive, em
+# <drive_root>/pretrained/; aqui só ficam procedência e checksum para verificação.
+gmnet_s3:
+  file: gmnet_s3.npy
+  sha256: ed974e2e8ffe7f96c51187f08a519478ab345c7f3972efea768e445ef13f7377
+  size_bytes: 31525414
+  source: https://drive.google.com/drive/folders/1hUF4ozaNTLl6TxQM87jOfD7evWD585NY
+  gdrive_file_id: 1LgS6biHIOutFBCYMJDVO876PhQWgy9fa
+  referenced_by: https://github.com/YFWang1999/GmNet (README)
+  dataset: ImageNet-1K
+  format: >-
+    .npy com pickle de um dict (state_dict do PyTorch em arrays NumPy).
+    Carregar apenas com Unpickler restrito a numpy.core.multiarray._reconstruct,
+    numpy.ndarray e numpy.dtype.
+  # Configuração que carrega o checkpoint com strict=True (difere de gmnet_s3() do código público).
+  architecture:
+    embed_dim: [48, 96, 192, 384]
+    depths: [3, 3, 8, 3]
+    mlp_ratio: [4, 4, 4, 4]
+    kernel_size: 7
+    f12_bn: true
+    g_bn: true
+    dwconv2_bn: true
+    act: ReLU6
+    downsampler_act: Identity
+  verified: 2026-11-23  # ver docs/decisoes.md, "Análise do checkpoint gmnet_s3.npy"

@@ -52,6 +52,8 @@ mlruns/
 *.ckpt
 *.onnx
 *.safetensors
+*.npy
+*.npz
 
 # Configurações locais e credenciais
 .env

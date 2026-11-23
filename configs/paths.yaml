@@ -1,11 +1,12 @@
 # Caminhos do ambiente de execução (Google Colab + Google Drive).
 # `drive_root` é a pasta do projeto no seu Drive; as subpastas são relativas a ela.
-drive_root: /content/drive/MyDrive/cerrado-flora-gating
+drive_root: /content/drive/MyDrive/ProjetoFinalRNAP_UnB2026
 drive_subdirs:
   raw: raw
   interim: interim
   processed: processed
   checkpoints: checkpoints
+  pretrained: pretrained  # pesos pré-treinados de terceiros (ver configs/pretrained.yaml)
   results: results
 # Cópia local (temporária) dos dados no Colab para leitura rápida durante o treino.
 local_cache: /content/cache

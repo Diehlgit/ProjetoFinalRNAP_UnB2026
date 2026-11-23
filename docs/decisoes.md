@@ -15,6 +15,9 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 | 2026-11-23 | Repositório GitHub renomeado para `Diehlgit/ProjetoFinalRNAP_UnB2026` e tornado público. | Nome exigido pelo enunciado; acesso do professor; clone no Colab sem token. |
 | 2026-11-23 | Idioma do artigo: português do Brasil. | Decisão do autor. |
 | 2026-11-23 | A inovação sobre o GmNet será definida **após** a análise de desempenho no dataset montado. | Decidir com base em evidência do comportamento do modelo nos dados do Cerrado. |
+| 2026-11-23 | **Pré-treino: usar os pesos ImageNet-1K do GmNet-S3** (`gmnet_s3.npy`) com *fine-tuning* no dataset do Cerrado. O baseline também deverá partir de pesos ImageNet-1K, com porte comparável (~7–8 M parâmetros, ~1 GMAC). | Pesos públicos verificados (ver análise abaixo); em datasets pequenos o pré-treino tende a ser decisivo, e o treino do zero poderia mascarar o efeito do gating. Regra 7: mesmas condições para todos os modelos. |
+| 2026-11-23 | Pesos pré-treinados de terceiros ficam no Google Drive (`<drive_root>/pretrained/`), fora do Git; procedência, checksum SHA-256 e configuração de arquitetura em `configs/pretrained.yaml`. | Regra 5 (sem binários grandes no Git); o checksum garante que a cópia usada é a verificada. |
+| 2026-11-23 | Código do GmNet **copiado do repositório oficial** (que não declara licença), com citação, em `src/cerrado_flora/models/gmnet.py`; alterações documentadas no cabeçalho do arquivo. | Uso exclusivamente acadêmico; reimplementar produziria o mesmo código e arriscaria divergências. |
 
 ## Pendentes
 
@@ -23,13 +26,8 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 - [ ] **Artigos correlatos adicionais da ICLR 2026** (até 4 no total).
 
 ### Modelos e comparação
-- [ ] **Baseline**: qual arquitetura leve (p.ex. StarNet, MobileNetV3, EfficientNet-B0).
+- [ ] **Baseline**: arquitetura leve **com pesos ImageNet-1K disponíveis** e porte comparável ao GmNet-S3 (7,82 M parâmetros, 1,24 GMACs). Candidato natural: StarNet-S4, antecessor direto do GmNet (disponibilidade dos pesos a verificar). Outros: MobileNetV3, EfficientNet-B0 (menores).
 - [ ] **Desenho do experimento**: (a) baseline com o bloco de gating do GmNet substituído/inserido, isolando o efeito; (b) GmNet completo vs. baseline; ou ambos. (A seção 2 do CLAUDE.md descreve (a) e a etapa 5 da seção 6 descreve (b).)
-- [ ] **Pré-treino**: ImageNet ou do zero — deve ser o mesmo para todos os modelos comparados.
-  - Intenção do autor (2026-11-23): treinar do zero seguindo a arquitetura proposta, por um levantamento anterior indicar ausência de pesos públicos.
-  - Verificação (2026-11-23): o README do repositório oficial aponta uma pasta no Google Drive (`GmNet_checkpoints`) que contém **apenas `gmnet_s3.npy` (30,1 MB)**; não há pesos de S1/S2. Formato `.npy` e conteúdo (ImageNet-1K?) ainda não verificados.
-  - Consequências a considerar: (i) com treino do zero, o baseline também deve ser treinado do zero (regra 7); (ii) modelos treinados do zero em datasets pequenos tendem a ter desempenho bem inferior aos pré-treinados, o que pode mascarar o efeito do gating; (iii) usar o S3 pré-treinado exigiria um baseline pré-treinado de porte comparável.
-- [ ] **Licença do código do GmNet**: o repositório `YFWang1999/GmNet` não declara licença (verificado em 2026-11-23). Definir se o modelo será reimplementado a partir do artigo ou se o código será reutilizado com citação explícita.
 - [ ] **Critério de "leve"**: limite de parâmetros/FLOPs; reportar latência?
 - [ ] **Inovação explícita** sobre o artigo (adiada para após a análise de desempenho; ideias: sensibilidade a filtros passa-baixa/passa-alta, espectro das ativações com e sem gating).
 
@@ -46,3 +44,25 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 - [ ] Número de seeds e teste estatístico.
 - [ ] Registro de experimentos (CSV, TensorBoard ou W&B).
 - [ ] Orçamento de GPU (Colab gratuito ou Pro).
+
+## Análise do checkpoint `gmnet_s3.npy` (2026-11-23)
+
+Fonte: pasta `GmNet_checkpoints` no Google Drive, apontada pelo README de `YFWang1999/GmNet`
+(arquivo de 31.525.414 bytes; ID do Drive `1LgS6biHIOutFBCYMJDVO876PhQWgy9fa`).
+
+- **Formato**: `.npy` com array de objeto (pickle protocolo 3) contendo um `dict` com 535 tensores (`state_dict` do PyTorch convertido para NumPy). A varredura estática do pickle (`pickletools`) mostra apenas os globais `numpy.core.multiarray._reconstruct`, `numpy.ndarray` e `numpy.dtype`, ou seja, nenhuma chamada executável. Carregar com um `Unpickler` restrito a esses três globais, nunca com `np.load(..., allow_pickle=True)` sem verificação.
+- **Conteúdo**: 7,82 M de parâmetros; cabeça `head` de 1000 classes (ImageNet-1K); estatísticas de BN treinadas (`num_batches_tracked` = 132.500 em todas as camadas); sem NaN/Inf.
+- **Divergência com o código público**: o checkpoint **não carrega** em `gmnet_s3()` do arquivo `gment.py` oficial, que usa `f12_bn=False` e `dwconv2_bn=False`. O checkpoint tem BN em `f1` e `dwconv2`. Carrega com `strict=True` usando:
+  `Model(embed_dim=[48, 96, 192, 384], depths=[3, 3, 8, 3], mlp_ratio=[4, 4, 4, 4], kernel_size=7, f12_bn=True, g_bn=True, dwconv2_bn=True, act=nn.ReLU6, downsampler_act=nn.Identity, block=Block)`.
+  Atenção: `gmnet_s3(pretrained=True)` também não serve, porque converte as convoluções 1×1 em `Linear` e muda os nomes das chaves.
+- **Custo**: 1,24 GMACs com entrada 224×224 (medido com `torch.utils.flop_counter`).
+- **Teste de sanidade** em 200 imagens do ImageNet (repositório `EliSchwartz/imagenet-sample-images`, 1 imagem por classe, a cada 5 classes; pré-processamento redimensionar 256 bicúbico + recorte central 224 + normalização ImageNet):
+
+  | Configuração | Top-1 | Top-5 |
+  |---|---|---|
+  | ReLU6 (código oficial) + flags de BN acima | 86,5% | 98,5% |
+  | ReLU | 4,5% | 6,0% |
+  | Controle: pesos aleatórios | 0,0% | 1,0% |
+
+  O resultado é compatível com os 81,3% reportados para o GmNet-S3 (amostra pequena e com imagens "típicas"; não substitui a avaliação no conjunto de validação). Confirma também que a ativação do gating é ReLU6.
+- **Gating do bloco** (código oficial): `x = ReLU6(f1(dwconv(x))) * f1(dwconv(x))`, seguido de `g`, `dwconv2`, *layer scale* `gamma` e conexão residual.
