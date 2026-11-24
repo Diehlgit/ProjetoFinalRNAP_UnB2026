@@ -24,3 +24,25 @@ gmnet_s3:
     act: ReLU6
     downsampler_act: Identity
   verified: 2026-11-23  # ver docs/decisoes.md, "Análise do checkpoint gmnet_s3.npy"
+
+# Baseline (decisão de 2026-11-24). Arquivo baixado do release oficial; fica no Drive,
+# em <drive_root>/pretrained/ (o notebook 03 baixa se não existir e confere o SHA-256).
+starnet_s4:
+  file: starnet_s4.pth.tar
+  sha256: 2fc78708db4387359ccb06ac7d4e1ade5859c8b11df0fdc7551eaa6cbbb65d5f
+  size_bytes: 90317909
+  url: https://github.com/ma-xu/Rewrite-the-Stars/releases/download/checkpoints_v1/starnet_s4.pth.tar
+  referenced_by: https://github.com/ma-xu/Rewrite-the-Stars (imagenet/starnet.py, model_urls)
+  license: Apache-2.0
+  dataset: ImageNet-1K
+  format: >-
+    torch.save (zip) com dict: state_dict (502 tensores, 7.482.728 parâmetros), optimizer,
+    args (argparse.Namespace), epoch (296), metric (78,838 = top-1 na validação do ImageNet),
+    version. Globais do pickle: OrderedDict, _rebuild_tensor_v2, FloatStorage, LongStorage,
+    argparse.Namespace. Carregar com torch.load(weights_only=True) liberando só argparse.Namespace.
+  reported: {params: 7.5M, flops: 1075M, imagenet_top1: 78.8}  # README oficial
+  architecture:
+    base_dim: 32
+    depths: [3, 3, 12, 5]
+    mlp_ratio: 4
+  verified: 2026-11-24  # inspeção estática; teste de sanidade no ImageNet no notebook 03

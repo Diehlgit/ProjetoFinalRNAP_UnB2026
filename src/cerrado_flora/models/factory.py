@@ -30,4 +30,10 @@ def build_model(model_cfg: dict, num_classes: int, pretrained_path: str | Path |
         if pretrained_path is None:
             return gmnet_s3(num_classes=num_classes, **kwargs)
         return load_pretrained(pretrained_path, num_classes=num_classes, **kwargs)
+    if arch == "starnet_s4":
+        from cerrado_flora.models.starnet import load_pretrained, starnet_s4
+
+        if pretrained_path is None:
+            return starnet_s4(num_classes=num_classes, **kwargs)
+        return load_pretrained(pretrained_path, num_classes=num_classes, **kwargs)
     raise ValueError(f"arquitetura desconhecida: {arch}")

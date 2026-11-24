@@ -53,9 +53,32 @@ def test_loaders_shapes_and_order(tiny_dataset):
     assert y.tolist() == loaders["val"].dataset.labels[: len(y)].tolist()
 
 
-def test_gmnet_head_has_num_classes():
-    m = build_model({"arch": "gmnet_s3"}, num_classes=7, pretrained_path=None)
+@pytest.mark.parametrize("arch", ["gmnet_s3", "starnet_s4"])
+def test_model_head_has_num_classes(arch):
+    m = build_model({"arch": arch}, num_classes=7, pretrained_path=None)
     assert m(torch.zeros(1, 3, 64, 64)).shape == (1, 7)
+
+
+def test_starnet_s4_matches_inspected_checkpoint():
+    # 7.482.728 parâmetros com cabeça de 1000 classes (inspeção do checkpoint oficial)
+    m = build_model({"arch": "starnet_s4"}, num_classes=1000, pretrained_path=None)
+    assert sum(p.numel() for p in m.parameters()) == 7_482_728
+    assert len(m.state_dict()) == 502
+
+
+def test_starnet_loader_accepts_official_checkpoint_layout(tmp_path):
+    # Simula o formato do arquivo oficial: dict com state_dict, optimizer e args (Namespace)
+    import argparse
+
+    from cerrado_flora.models.starnet import load_pretrained, starnet_s4
+
+    ref = starnet_s4()
+    torch.save({"epoch": 296, "arch": "starnet_s4", "state_dict": ref.state_dict(),
+                "optimizer": {}, "version": 2, "args": argparse.Namespace(lr=3e-3),
+                "metric": 78.8}, tmp_path / "ck.pth.tar")
+    m = load_pretrained(tmp_path / "ck.pth.tar", num_classes=30)
+    assert m.head.out_features == 30
+    assert torch.equal(m.stem[0].conv.weight, ref.stem[0].conv.weight)
 
 
 def test_lr_schedule_warmup_and_cosine():
