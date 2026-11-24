@@ -36,4 +36,4 @@ train:
   selection_metric: macro_f1            # macro-F1 por foto na validação
   grad_clip: null
 
-seeds: [2026]                           # 1 semente por enquanto (decisão de 2026-11-24)
+seeds: [2026, 2027, 2028, 2029, 2030]   # 5 sementes (decisão de 2026-11-24); concluídas são puladas
