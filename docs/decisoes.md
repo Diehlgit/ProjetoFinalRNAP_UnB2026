@@ -25,6 +25,10 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 | 2026-11-24 | **Classes**: espécies com ≥ 50 observações elegíveis; **limite de 150 observações** por classe, sorteadas com semente fixa. | No DF, ~35 espécies atingem 50 observações. O limite reduz o desbalanceamento (a maior tinha 334). |
 | 2026-11-24 | **Fotos por observação**: todas as fotos elegíveis; a observação é a unidade de divisão. | Mais imagens sem vazamento entre fotos da mesma planta. |
 | 2026-11-24 | **Divisão**: 70/15/15 **por classe** (cada espécie dividida separadamente, com ≥ 1 observação em validação e teste), semente 2026. Observações com fotos quase idênticas (dHash, distância ≤ 4) ficam no mesmo grupo e na mesma divisão; quase-duplicatas entre classes diferentes são descartadas. Sobreposição de observadores entre divisões é **relatada, não imposta**. | Garante a presença de todas as classes em todas as divisões. Impor a separação por observador poderia esvaziar classes dominadas por poucos observadores. |
+| 2026-11-24 | **Métricas**: top-1, macro-F1 e acurácia balanceada, por foto e por observação (média das probabilidades das fotos). Checkpoint escolhido pelo **macro-F1 por foto na validação**; teste avaliado uma única vez, com o checkpoint escolhido. | Classes de 50 a 150 observações: o macro-F1 pesa as classes pequenas igual às grandes. |
+| 2026-11-24 | **Sementes**: 1 por enquanto (2026); o número final e o teste estatístico continuam pendentes. | Obter um primeiro resultado antes de gastar GPU com repetições. |
+| 2026-11-24 | **Registro de experimentos**: CSV/JSON no Drive (`results/<exp>/seed_<n>/`: histórico por época, métricas, predições, matriz de confusão, metadados da execução); checkpoints em `checkpoints/<exp>/seed_<n>/`. | Sem contas nem tokens (Colab Secrets não funcionam na extensão do VS Code). |
+| 2026-11-24 | **Testes que usam PyTorch rodam no Colab** (notebook 02, seção 2); o `.venv` local não tem PyTorch e roda só os demais testes. | Decisão do autor. |
 | 2026-11-24 | **Reprodutibilidade do dataset**: o dataset reportado é o congelado em `data/manifests/images.csv` (IDs, URLs, divisão, SHA-256 de cada foto), versionado no Git. `python -m cerrado_flora.data fetch` recria as imagens a partir do manifesto e verifica os checksums; `build` reaplica o procedimento de `configs/dataset.yaml`. | O iNaturalist muda com o tempo; reexecutar a consulta não reproduz o mesmo conjunto. |
 | 2026-11-23 | Código do GmNet **copiado do repositório oficial** (que não declara licença), com citação, em `src/cerrado_flora/models/gmnet.py`; alterações documentadas no cabeçalho do arquivo. | Uso exclusivamente acadêmico; reimplementar produziria o mesmo código e arriscaria divergências. |
 
@@ -41,10 +45,9 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 - [ ] **Inovação explícita** sobre o artigo (adiada para após a análise de desempenho; ideias: sensibilidade a filtros passa-baixa/passa-alta, espectro das ativações com e sem gating).
 
 ### Avaliação
-- [ ] Métricas (top-1, macro-F1, acurácia balanceada).
-- [ ] Número de seeds e teste estatístico.
-- [ ] Registro de experimentos (CSV, TensorBoard ou W&B).
+- [ ] Número final de seeds (por ora 1) e teste estatístico.
 - [ ] Orçamento de GPU (Colab gratuito ou Pro).
+- [ ] Hiperparâmetros de fine-tuning: os de `configs/experiments/gmnet_s3_ft.yaml` são um ponto de partida, a revisar após a primeira execução.
 
 ## Análise do checkpoint `gmnet_s3.npy` (2026-11-23)
 

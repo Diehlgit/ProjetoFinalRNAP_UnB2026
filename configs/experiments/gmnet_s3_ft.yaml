@@ -1,0 +1,39 @@
+# Fine-tuning do GmNet-S3 (pesos ImageNet-1K, configs/pretrained.yaml) no cerrado_df_v1.
+# Os mesmos dados, divisões e hiperparâmetros devem valer para o baseline (regra 7).
+name: gmnet_s3_ft
+
+dataset:
+  name: cerrado_df_v1
+  manifest: data/manifests/images.csv   # relativo à raiz do repositório
+
+model:
+  arch: gmnet_s3
+  pretrained: gmnet_s3                  # chave em configs/pretrained.yaml
+  drop_path_rate: 0.0
+
+data:
+  img_size: 224
+  resize: 256                           # validação/teste: lado menor 256 + recorte central 224
+  train_crop_scale: [0.25, 1.0]         # RandomResizedCrop
+  batch_size: 64
+  num_workers: 2                        # o Colab gratuito tem 2 CPUs
+
+optim:
+  lr: 5.0e-4
+  weight_decay: 0.05                    # não aplicado a vieses, BN e gamma
+  betas: [0.9, 0.999]
+
+schedule:
+  epochs: 50
+  warmup_epochs: 5
+  min_lr: 1.0e-6
+
+loss:
+  label_smoothing: 0.1
+
+train:
+  amp: true
+  selection_metric: macro_f1            # macro-F1 por foto na validação
+  grad_clip: null
+
+seeds: [2026]                           # 1 semente por enquanto (decisão de 2026-11-24)
