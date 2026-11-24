@@ -1,0 +1,41 @@
+# Definição do dataset (ver docs/decisoes.md, decisões de 2026-11-24).
+# `python -m cerrado_flora.data build` aplica este procedimento; o dataset reportado é
+# o congelado em data/manifests/images.csv (recriável com `python -m cerrado_flora.data fetch`).
+name: cerrado_df_v1
+
+inaturalist:
+  api: https://api.inaturalist.org/v1
+  place_id: 12591            # Distrito Federal, BR
+  taxon_id: 47126            # Plantae
+  quality_grade: research
+  photo_licenses: [cc0, cc-by, cc-by-nc]   # verificadas foto a foto
+  created_before: 2026-11-23 # created_d2: só observações criadas até esta data (inclusive)
+  photo_size: medium         # lado maior de até 500 px
+  request_interval_s: 1.0    # limite recomendado pela API: ~60 requisições/min
+  user_agent: cerrado-flora-dataset/0.1 (academic research)
+
+native:
+  source: Flora e Funga do Brasil (JBRJ), DwC-A lista_especies_flora_brasil
+  version: "393.433"
+  dwca_url: https://ipt.jbrj.gov.br/jbrj/archive.do?r=lista_especies_flora_brasil&v=393.433
+  sha256: bb31878e0a1df9eed2a25a6ced5ea2bf22f616a12befd600a6352d3a5deedc57
+  establishment: Nativa
+  domain: Cerrado
+  # Correções manuais de correspondência de nomes (espécies em "revisao_manual"):
+  # "Nome no iNaturalist": {ffb_id: "123", note: "justificativa"}
+  manual: {}
+
+selection:
+  min_observations: 50       # observações com ao menos uma foto elegível
+  max_observations: 150      # limite por classe, sorteado com a semente
+
+split:
+  unit: observation          # todas as fotos de uma observação na mesma divisão
+  proportions: {train: 0.70, val: 0.15, test: 0.15}
+  seed: 2026
+
+dedup:
+  dhash_max_distance: 4      # distância de Hamming (64 bits) para quase-duplicatas
+
+download:
+  workers: 4

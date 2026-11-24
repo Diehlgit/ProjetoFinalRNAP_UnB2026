@@ -20,6 +20,7 @@ data/*
 !data/manifests/
 data/manifests/*
 !data/manifests/*.csv
+!data/manifests/*.json
 !data/manifests/.gitkeep
 
 # Segunda camada de proteção contra imagens e arquivos grandes fora de paper/ e reports/
