@@ -119,7 +119,9 @@ def run_experiment(
     start_epoch, best, best_epoch, history = 0, -1.0, -1, []
     last_path, best_path = ckpt_dir / "last.pt", ckpt_dir / "best.pt"
     if last_path.exists():  # arquivos gerados por este código; não são de terceiros
-        state = torch.load(last_path, map_location=device, weights_only=False)
+        # Carregado na CPU: os estados do gerador aleatório precisam ser ByteTensors de CPU;
+        # model e optimizer.load_state_dict movem os tensores para o dispositivo dos parâmetros.
+        state = torch.load(last_path, map_location="cpu", weights_only=False)
         model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
         scheduler.load_state_dict(state["scheduler"])
