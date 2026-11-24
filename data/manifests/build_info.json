@@ -1,0 +1,232 @@
+{
+  "dataset": "cerrado_df_v1",
+  "config": {
+    "name": "cerrado_df_v1",
+    "inaturalist": {
+      "api": "https://api.inaturalist.org/v1",
+      "place_id": 12591,
+      "taxon_id": 47126,
+      "quality_grade": "research",
+      "photo_licenses": [
+        "cc0",
+        "cc-by",
+        "cc-by-nc"
+      ],
+      "created_before": "2026-11-23",
+      "photo_size": "medium",
+      "request_interval_s": 1.0,
+      "user_agent": "cerrado-flora-dataset/0.1 (academic research)"
+    },
+    "native": {
+      "source": "Flora e Funga do Brasil (JBRJ), DwC-A lista_especies_flora_brasil",
+      "version": "393.433",
+      "dwca_url": "https://ipt.jbrj.gov.br/jbrj/archive.do?r=lista_especies_flora_brasil&v=393.433",
+      "sha256": "bb31878e0a1df9eed2a25a6ced5ea2bf22f616a12befd600a6352d3a5deedc57",
+      "establishment": "Nativa",
+      "domain": "Cerrado",
+      "manual": {}
+    },
+    "selection": {
+      "min_observations": 50,
+      "max_observations": 150
+    },
+    "split": {
+      "unit": "observation",
+      "proportions": {
+        "train": 0.7,
+        "val": 0.15,
+        "test": 0.15
+      },
+      "seed": 2026
+    },
+    "dedup": {
+      "dhash_max_distance": 4
+    },
+    "download": {
+      "workers": 4
+    }
+  },
+  "build_started_utc": "2026-11-24T12:02:32+00:00",
+  "inat_query": {
+    "query_utc": "2026-11-24T11:35:18+00:00",
+    "params": {
+      "place_id": 12591,
+      "taxon_id": 47126,
+      "quality_grade": "research",
+      "photo_license": "cc0,cc-by,cc-by-nc",
+      "created_d2": "2026-11-23",
+      "order_by": "id",
+      "order": "asc",
+      "per_page": 200
+    }
+  },
+  "flora_brasil_sha256": "bb31878e0a1df9eed2a25a6ced5ea2bf22f616a12befd600a6352d3a5deedc57",
+  "build_finished_utc": "2026-11-24T12:04:35+00:00",
+  "funil": {
+    "observacoes_retornadas_api": 11417,
+    "observacoes_especie_com_foto_elegivel": 11301,
+    "fotos_elegiveis": 31360,
+    "especies": 1301,
+    "especies_com_min_observacoes": 35,
+    "especies_nativas_cerrado": 30,
+    "classes_finais": 30,
+    "observacoes_finais": 2507,
+    "fotos_finais": 6267
+  },
+  "por_divisao": {
+    "train": {
+      "observacoes": 1753,
+      "fotos": 4329
+    },
+    "val": {
+      "observacoes": 377,
+      "fotos": 982
+    },
+    "test": {
+      "observacoes": 377,
+      "fotos": 956
+    }
+  },
+  "grupos_com_mais_de_uma_observacao": 6,
+  "sobreposicao_observador_media": {
+    "val": 0.6574835621894446,
+    "test": 0.638823581102993
+  },
+  "fotos_descartadas": [
+    {
+      "photo_id": 755577543,
+      "motivo": "quase-duplicata em outra classe"
+    },
+    {
+      "photo_id": 755577865,
+      "motivo": "quase-duplicata em outra classe"
+    },
+    {
+      "photo_id": 97329377,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 97329386,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 97329394,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 175683131,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 175683136,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 195455742,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 225008432,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 225008457,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 284753318,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 360731815,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 438129183,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 604059253,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 650350804,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 650350807,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 650758765,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 651417943,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 651421976,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 653014795,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 653854387,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 653854390,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 653854420,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 662768087,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 667875991,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 672394793,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 672402476,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 673279324,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 673279329,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 687378672,
+      "motivo": "cópia exata de outra foto"
+    },
+    {
+      "photo_id": 766744751,
+      "motivo": "cópia exata de outra foto"
+    }
+  ],
+  "codigo": {
+    "timestamp_utc": "2026-11-24T12:04:35.774331+00:00",
+    "git_commit": "472528d7ebefe93b4a6b645d94cf465b67240431",
+    "git_dirty": false,
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+    "torch": null,
+    "pandas": "3.1.1",
+    "numpy": "2.5.5",
+    "pillow": "13.0.0"
+  }
+}

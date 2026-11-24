@@ -17,6 +17,15 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 | 2026-11-23 | A inovação sobre o GmNet será definida **após** a análise de desempenho no dataset montado. | Decidir com base em evidência do comportamento do modelo nos dados do Cerrado. |
 | 2026-11-23 | **Pré-treino: usar os pesos ImageNet-1K do GmNet-S3** (`gmnet_s3.npy`) com *fine-tuning* no dataset do Cerrado. O baseline também deverá partir de pesos ImageNet-1K, com porte comparável (~7–8 M parâmetros, ~1 GMAC). | Pesos públicos verificados (ver análise abaixo); em datasets pequenos o pré-treino tende a ser decisivo, e o treino do zero poderia mascarar o efeito do gating. Regra 7: mesmas condições para todos os modelos. |
 | 2026-11-23 | Pesos pré-treinados de terceiros ficam no Google Drive (`<drive_root>/pretrained/`), fora do Git; procedência, checksum SHA-256 e configuração de arquitetura em `configs/pretrained.yaml`. | Regra 5 (sem binários grandes no Git); o checksum garante que a cópia usada é a verificada. |
+| 2026-11-24 | **Fonte e recorte**: iNaturalist, Distrito Federal (`place_id` 12591), Plantae, apenas *research grade*, observações criadas até 2026-11-23 (`created_d2`). | Escopo da seção 2 mantido (só DF). *Research grade* exige concordância da comunidade na espécie e exclui plantas cultivadas. A data de corte limita a deriva da consulta. |
+| 2026-11-24 | **Licenças aceitas**: CC0, CC-BY e CC-BY-NC, verificadas **foto a foto**; atribuição de cada foto no manifesto. | Uso acadêmico não comercial; imagens não são redistribuídas (Drive privado). Só CC0/CC-BY daria ~1,6 mil observações no DF, insuficiente. |
+| 2026-11-24 | **Nativas do Cerrado**: Flora e Funga do Brasil (DwC-A do IPT/JBRJ, versão 393.433, SHA-256 no config), `establishmentMeans` = Nativa e Cerrado entre os domínios fitogeográficos (não exige endemismo). Nomes sem correspondência única vão para revisão manual e ficam fora até serem resolvidos em `native.manual`. | Fonte oficial e versionada; critério reproduzível. |
+| 2026-11-24 | **Espécie sem distribuição na Flora e Funga** (sem domínio ou estabelecimento no registro da espécie): herda dos infraespecíficos aceitos — nativa só se **todos** forem "Nativa"; domínios e estados = união. Sem informação em nenhum nível → revisão manual (nunca exclusão automática). Caso que motivou: *Calliandra dysantha* (registro da espécie vazio; as 4 variedades são nativas do Cerrado). | Ausência de dado na fonte não é evidência de não ser nativa; a regra é geral e reproduzível, ao contrário de exceções manuais. |
+| 2026-11-24 | ***Miconia fallax* mantida fora**: a Flora e Funga (v. 393.433) lista só "Amazônia" como domínio, embora registre ocorrência em DF, GO, MG, MS, MT e TO. Aplicado o critério como está; a inconsistência deve ser mencionada no artigo. | Evitar julgamentos *ad hoc* sobre a fonte de referência. |
+| 2026-11-24 | **Classes**: espécies com ≥ 50 observações elegíveis; **limite de 150 observações** por classe, sorteadas com semente fixa. | No DF, ~35 espécies atingem 50 observações. O limite reduz o desbalanceamento (a maior tinha 334). |
+| 2026-11-24 | **Fotos por observação**: todas as fotos elegíveis; a observação é a unidade de divisão. | Mais imagens sem vazamento entre fotos da mesma planta. |
+| 2026-11-24 | **Divisão**: 70/15/15 **por classe** (cada espécie dividida separadamente, com ≥ 1 observação em validação e teste), semente 2026. Observações com fotos quase idênticas (dHash, distância ≤ 4) ficam no mesmo grupo e na mesma divisão; quase-duplicatas entre classes diferentes são descartadas. Sobreposição de observadores entre divisões é **relatada, não imposta**. | Garante a presença de todas as classes em todas as divisões. Impor a separação por observador poderia esvaziar classes dominadas por poucos observadores. |
+| 2026-11-24 | **Reprodutibilidade do dataset**: o dataset reportado é o congelado em `data/manifests/images.csv` (IDs, URLs, divisão, SHA-256 de cada foto), versionado no Git. `python -m cerrado_flora.data fetch` recria as imagens a partir do manifesto e verifica os checksums; `build` reaplica o procedimento de `configs/dataset.yaml`. | O iNaturalist muda com o tempo; reexecutar a consulta não reproduz o mesmo conjunto. |
 | 2026-11-23 | Código do GmNet **copiado do repositório oficial** (que não declara licença), com citação, em `src/cerrado_flora/models/gmnet.py`; alterações documentadas no cabeçalho do arquivo. | Uso exclusivamente acadêmico; reimplementar produziria o mesmo código e arriscaria divergências. |
 
 ## Pendentes
@@ -30,14 +39,6 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 - [ ] **Desenho do experimento**: (a) baseline com o bloco de gating do GmNet substituído/inserido, isolando o efeito; (b) GmNet completo vs. baseline; ou ambos. (A seção 2 do CLAUDE.md descreve (a) e a etapa 5 da seção 6 descreve (b).)
 - [ ] **Critério de "leve"**: limite de parâmetros/FLOPs; reportar latência?
 - [ ] **Inovação explícita** sobre o artigo (adiada para após a análise de desempenho; ideias: sensibilidade a filtros passa-baixa/passa-alta, espectro das ativações com e sem gating).
-
-### Dados
-- [ ] Número de espécies e mínimo de imagens por espécie.
-- [ ] Filtro de qualidade do iNaturalist (apenas *research grade*?).
-- [ ] Fonte e critério de validação de nativas do Cerrado (p.ex. Flora e Funga do Brasil/REFLORA; nativa com ocorrência no domínio vs. endêmica).
-- [ ] Licenças aceitas (CC0, CC-BY, CC-BY-NC?).
-- [ ] Unidade de divisão treino/validação/teste (observação; agrupar também por observador/local?) e proporções.
-- [ ] Uso de múltiplas fotos por observação.
 
 ### Avaliação
 - [ ] Métricas (top-1, macro-F1, acurácia balanceada).
