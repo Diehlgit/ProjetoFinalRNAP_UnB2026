@@ -7,7 +7,11 @@ acadêmico, com citação. Alterações em relação ao original:
 - removidos `register_model`, `PermuteLienar` e `convert_model` (não usados aqui);
 - `gmnet_s3` com `f12_bn=True` e `dwconv2_bn=True`, a configuração que corresponde ao
   checkpoint público `gmnet_s3.npy` (o código oficial usa `False`; ver docs/decisoes.md);
-- adicionada `load_pretrained`, que carrega o checkpoint `.npy` com segurança.
+- adicionada `load_pretrained`, que carrega o checkpoint `.npy` com segurança;
+- adicionado o parâmetro `gating` (padrão `True`, comportamento original). Com
+  `gating=False` o bloco calcula `act(x)` em vez de `act(x) * x`; é a única diferença,
+  e o gating não tem parâmetros, então as duas variantes têm os mesmos pesos (ablação
+  do gating, ver docs/decisoes.md).
 """
 # Estilo do código original mantido de propósito, para facilitar a comparação.
 # ruff: noqa: B006, PLR0402, UP034
@@ -24,8 +28,9 @@ from timm.layers import DropPath, trunc_normal_
 class Block(nn.Module):
     def __init__(self, dim, mlp_ratio=3, kernel_size=7,
                  f12_bn=False, g_bn=True, dwconv2_bn=False, act=nn.ReLU,
-                 drop_path=0., layer_scale=1e-6):
+                 drop_path=0., layer_scale=1e-6, gating=True):
         super().__init__()
+        self.gating = gating
         self.dwconv = ConvBN(dim, dim, kernel_size, 1, (kernel_size - 1) // 2, groups=dim, with_bn=True)
         self.f1 = ConvBN(dim, mlp_ratio * dim, 1, with_bn=f12_bn)
         self.g = ConvBN(mlp_ratio * dim, dim, 1, with_bn=g_bn)
@@ -41,7 +46,10 @@ class Block(nn.Module):
         input = x
         x = self.dwconv(x)
         x = self.f1(x)
-        x = self.act(x) * (x)  # mecanismo de gating
+        if self.gating:
+            x = self.act(x) * (x)  # mecanismo de gating
+        else:
+            x = self.act(x)  # ablação: só a ativação, sem a multiplicação
         x = self.g(x)
         x = self.dwconv2(x)
         x = x.permute(0, 2, 3, 1)  # (N, C, H, W) -> (N, H, W, C)
@@ -75,7 +83,7 @@ class Model(nn.Module):
                  embed_dim=[32, 64, 128, 256], depths=[2, 2, 8, 2],
                  f12_bn=False, g_bn=False, dwconv2_bn=False, act=nn.ReLU, downsampler_act=nn.ReLU,
                  mlp_ratio=[4, 4, 4, 4], layer_scale=1e-6,
-                 drop_path_rate=0.0, kernel_size=7, block=None,
+                 drop_path_rate=0.0, kernel_size=7, block=None, gating=True,
                  **kwargs):
         super().__init__()
         self.num_classes = num_classes
@@ -100,7 +108,7 @@ class Model(nn.Module):
             blocks = [
                 block(self.in_channel, mlp_ratio=mlp_ratio[i_layer], kernel_size=kernel_size,
                       f12_bn=f12_bn, g_bn=g_bn, dwconv2_bn=dwconv2_bn, act=act,
-                      drop_path=dpr[cur + i], layer_scale=layer_scale)
+                      drop_path=dpr[cur + i], layer_scale=layer_scale, gating=gating)
                 for i in range(depths[i_layer])]
             cur += depths[i_layer]
             stage = nn.Sequential(down_sampler, *blocks)

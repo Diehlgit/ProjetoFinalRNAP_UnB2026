@@ -21,10 +21,17 @@ def verify_checkpoint(path: str | Path, expected_sha256: str) -> None:
 
 
 def build_model(model_cfg: dict, num_classes: int, pretrained_path: str | Path | None) -> nn.Module:
-    """Cria o modelo. `pretrained_path=None` cria com pesos aleatórios (apenas para testes)."""
+    """Cria o modelo. `pretrained_path=None` cria com pesos aleatórios (treino do zero).
+
+    `model_cfg["gating"]` (só GmNet, padrão `True`) desliga o gating na ablação.
+    """
     arch = model_cfg["arch"]
     kwargs = {"drop_path_rate": float(model_cfg.get("drop_path_rate", 0.0))}
+    gating = bool(model_cfg.get("gating", True))
+    if arch != "gmnet_s3" and not gating:
+        raise ValueError(f"gating=False só é suportado no gmnet_s3, não em {arch}")
     if arch == "gmnet_s3":
+        kwargs["gating"] = gating
         from cerrado_flora.models.gmnet import gmnet_s3, load_pretrained
 
         if pretrained_path is None:

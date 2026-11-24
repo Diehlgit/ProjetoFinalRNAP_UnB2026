@@ -59,6 +59,32 @@ def test_model_head_has_num_classes(arch):
     assert m(torch.zeros(1, 3, 64, 64)).shape == (1, 7)
 
 
+def test_gating_ablation_same_weights_different_function():
+    # O gating não tem parâmetros: mesma semente => mesmos pesos iniciais nas duas variantes
+    torch.manual_seed(0)
+    gated = build_model({"arch": "gmnet_s3", "gating": True}, num_classes=5, pretrained_path=None)
+    torch.manual_seed(0)
+    plain = build_model({"arch": "gmnet_s3", "gating": False}, num_classes=5, pretrained_path=None)
+    sa, sb = gated.state_dict(), plain.state_dict()
+    assert sa.keys() == sb.keys() and all(torch.equal(sa[k], sb[k]) for k in sa)
+    assert all(not blk.gating for st in plain.stages for blk in st[1:])
+    assert all(blk.gating for st in gated.stages for blk in st[1:])
+    # ...mas a função calculada é outra
+    for blk in plain.modules():  # gamma = 1e-6 deixaria os blocos quase nulos no teste
+        if getattr(blk, "gamma", None) is not None:
+            blk.gamma.data.fill_(1.0)
+    gated.load_state_dict(plain.state_dict())
+    gated.eval(), plain.eval()
+    x = torch.randn(2, 3, 64, 64)
+    with torch.no_grad():
+        assert not torch.allclose(gated(x), plain(x))
+
+
+def test_gating_flag_only_for_gmnet():
+    with pytest.raises(ValueError):
+        build_model({"arch": "starnet_s4", "gating": False}, num_classes=5, pretrained_path=None)
+
+
 def test_starnet_s4_matches_inspected_checkpoint():
     # 7.482.728 parâmetros com cabeça de 1000 classes (inspeção do checkpoint oficial)
     m = build_model({"arch": "starnet_s4"}, num_classes=1000, pretrained_path=None)
@@ -100,6 +126,14 @@ def test_run_experiment_end_to_end_and_resume(tiny_dataset, tmp_path):
     assert r["test"]["photo"]["n"] == 6 and r["test"]["observation"]["n"] == 3
     # Concluído: nova chamada não treina de novo
     assert run_experiment(cfg1, 0, *args) == json.loads((res / "metrics.json").read_text())
+
+
+def test_run_experiment_without_gating(tiny_dataset, tmp_path):
+    cfg = _cfg(epochs=1)
+    cfg["model"] = {"arch": "gmnet_s3", "pretrained": None, "gating": False}
+    r = run_experiment(cfg, 0, tiny_dataset / "images.csv", tiny_dataset, None,
+                       tmp_path / "ckpt", tmp_path / "res")
+    assert r["test"]["photo"]["n"] == 6
 
 
 def test_resume_from_last_checkpoint(tiny_dataset, tmp_path):

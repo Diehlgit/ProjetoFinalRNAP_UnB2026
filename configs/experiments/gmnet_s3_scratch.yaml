@@ -1,0 +1,41 @@
+# Ablação do gating: GmNet-S3 treinado do zero no cerrado_df_v1.
+# Idêntico a gmnet_s3_nogate_scratch.yaml exceto por `name` e `model.gating`; com a mesma semente,
+# os pesos iniciais são idênticos (o gating não tem parâmetros).
+name: gmnet_s3_scratch
+
+dataset:
+  name: cerrado_df_v1
+  manifest: data/manifests/images.csv   # relativo à raiz do repositório
+
+model:
+  arch: gmnet_s3
+  pretrained: null                      # treino do zero (pesos aleatórios)
+  gating: true                          # act(x) * x (original)
+  drop_path_rate: 0.0
+
+data:
+  img_size: 224
+  resize: 256                           # validação/teste: lado menor 256 + recorte central 224
+  train_crop_scale: [0.25, 1.0]         # RandomResizedCrop
+  batch_size: 64
+  num_workers: 2                        # o Colab gratuito tem 2 CPUs
+
+optim:
+  lr: 1.0e-3                            # receita do zero, provisória até o piloto
+  weight_decay: 0.05                    # não aplicado a vieses, BN e gamma
+  betas: [0.9, 0.999]
+
+schedule:
+  epochs: 100
+  warmup_epochs: 10
+  min_lr: 1.0e-6
+
+loss:
+  label_smoothing: 0.1
+
+train:
+  amp: true
+  selection_metric: macro_f1            # macro-F1 por foto na validação
+  grad_clip: null
+
+seeds: [2026]                           # piloto; número de sementes decidido depois dele

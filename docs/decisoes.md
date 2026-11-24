@@ -33,6 +33,9 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 | 2026-11-24 | **Testes que usam PyTorch rodam no Colab** (notebook 02, seção 2); o `.venv` local não tem PyTorch e roda só os demais testes. | Decisão do autor. |
 | 2026-11-24 | **Reprodutibilidade do dataset**: o dataset reportado é o congelado em `data/manifests/images.csv` (IDs, URLs, divisão, SHA-256 de cada foto), versionado no Git. `python -m cerrado_flora.data fetch` recria as imagens a partir do manifesto e verifica os checksums; `build` reaplica o procedimento de `configs/dataset.yaml`. | O iNaturalist muda com o tempo; reexecutar a consulta não reproduz o mesmo conjunto. |
 | 2026-11-23 | Código do GmNet **copiado do repositório oficial** (que não declara licença), com citação, em `src/cerrado_flora/models/gmnet.py`; alterações documentadas no cabeçalho do arquivo. | Uso exclusivamente acadêmico; reimplementar produziria o mesmo código e arriscaria divergências. |
+| 2026-11-24 | **Enquadramento após as 5 sementes**: GmNet-S3 e StarNet-S4 são tratados como **comparáveis** (teste, macro-F1 por foto 0,851 ± 0,006 vs. 0,836 ± 0,012; por observação 0,927 ± 0,005 vs. 0,920 ± 0,016). O foco passa a ser **quanto o gating contribui** para o desempenho do GmNet. | Diferença pequena (~1 pt) e não estabelecida estatisticamente (sinal 5/5 por foto, p = 0,0625 bilateral; por observação o sinal varia); além disso a comparação (b) não isola o gating. Decisão do autor. |
+| 2026-11-24 | **Ablação do gating (desenho (a))**: GmNet-S3 **treinado do zero** com e sem gating (`gmnet_s3_scratch.yaml` / `gmnet_s3_nogate_scratch.yaml`, diferem só em `model.gating`). Sem gating, o bloco calcula `ReLU6(x)` em vez de `ReLU6(x) * x`; o gating não tem parâmetros, então com a mesma semente os pesos iniciais são idênticos. Notebook 04. **Limitação**: mede a contribuição do gating sem pré-treino no ImageNet, com ~4,3 mil fotos de treino; não equivale à contribuição após o pré-treino. | Não há pesos ImageNet de um GmNet sem gating; partir dos pesos do GmNet e remover o gating mediria "retirar o gating de uma rede treinada com ele", não "gating vs. sem gating". |
+| 2026-11-24 | **Receita do zero (provisória)**: 100 épocas, warmup 10, LR 1e-3; demais hiperparâmetros e aumentos iguais aos do fine-tuning. **Piloto** com 1 semente (2026) por variante antes de decidir o número de sementes. | Do zero são necessárias mais épocas e LR maior; o piloto verifica a convergência antes de gastar GPU. Ajustes valem igualmente para as duas variantes. |
 
 ## Pendentes
 
@@ -41,12 +44,12 @@ Itens **pendentes** não devem ser assumidos na implementação até serem decid
 - [ ] **Artigos correlatos adicionais da ICLR 2026** (até 4 no total).
 
 ### Modelos e comparação
-- [ ] **Modelo que difira do GmNet só no gating** (desenho (a)), a considerar depois da comparação (b) — sugestão do autor. Sem pesos ImageNet para essa variante, exigiria outra estratégia (p. ex. trocar o bloco e ajustar a partir de pesos existentes).
+- [ ] **Número de sementes da ablação do gating** e ajuste da receita do zero, após o piloto (notebook 04).
 - [ ] **Critério de "leve"**: limite de parâmetros/FLOPs; reportar latência?
 - [ ] **Inovação explícita** sobre o artigo (adiada para após a análise de desempenho; ideias: sensibilidade a filtros passa-baixa/passa-alta, espectro das ativações com e sem gating).
 
 ### Avaliação
-- [ ] Teste estatístico da comparação (proposta: pareado por observação no teste, por semente; média ± desvio entre sementes).
+- [ ] Teste estatístico (adiado pelo autor em favor da ablação do gating; proposta: pareado por observação no teste, por semente, e pareado entre sementes; vale para (b) e para a ablação).
 - [ ] Orçamento de GPU (Colab gratuito ou Pro).
 - [ ] Hiperparâmetros de fine-tuning: os de `configs/experiments/gmnet_s3_ft.yaml` são um ponto de partida, a revisar após a primeira execução.
 
